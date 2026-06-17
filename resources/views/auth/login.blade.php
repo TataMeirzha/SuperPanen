@@ -21,7 +21,7 @@
         nav .logo { color: white; font-size: 22px; font-weight: bold; text-decoration: none; }
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
         .card {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.25);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             padding: 40px;
