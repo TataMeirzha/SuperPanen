@@ -7,27 +7,48 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body {
-            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/images/hero.jpg');
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/images/hero.jpg');
             background-size: cover; background-position: center; background-attachment: fixed;
             display: flex; flex-direction: column; min-height: 100vh;
         }
-        nav { background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        nav {
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 40px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(76,175,80,0.2);
+        }
         nav .logo { color: white; font-size: 22px; font-weight: bold; text-decoration: none; }
         .container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
-        .card { background: rgba(255,255,255,0.12); backdrop-filter: blur(15px); padding: 40px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); width: 100%; max-width: 420px; border: 1px solid rgba(255,255,255,0.2); }
+        .card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 100%; max-width: 420px;
+            border: 1px solid rgba(76,175,80,0.3);
+        }
         .card h2 { text-align: center; color: white; margin-bottom: 25px; font-size: 26px; }
         .form-group { margin-bottom: 18px; }
-        .form-group label { display: block; margin-bottom: 6px; color: rgba(255,255,255,0.9); font-size: 14px; }
-        .form-group input { width: 100%; padding: 11px 14px; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; font-size: 14px; outline: none; background: rgba(255,255,255,0.15); color: white; }
-        .form-group input::placeholder { color: rgba(255,255,255,0.5); }
-        .form-group input:focus { border-color: #a5d6a7; background: rgba(255,255,255,0.2); }
-        .error { background: rgba(198,40,40,0.3); border: 1px solid rgba(198,40,40,0.5); color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
-        .success { background: rgba(46,125,50,0.3); border: 1px solid rgba(46,125,50,0.5); color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
-        .btn { width: 100%; padding: 12px; background: #2e7d32; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; }
-        .btn:hover { background: #1b5e20; }
-        .link-text { text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.8); }
-        .link-text a { color: #a5d6a7; font-weight: bold; text-decoration: none; }
-        footer { background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.7); text-align: center; padding: 15px; font-size: 13px; }
+        .form-group label { display: block; margin-bottom: 6px; color: rgba(255,255,255,0.85); font-size: 14px; }
+        .form-group input {
+            width: 100%; padding: 11px 14px;
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 8px; font-size: 14px; outline: none;
+            background: rgba(0,0,0,0.4); color: white;
+            transition: border 0.2s;
+        }
+        .form-group input::placeholder { color: rgba(255,255,255,0.3); }
+        .form-group input:focus { border-color: #4caf50; background: rgba(0,0,0,0.5); }
+        .error { background: rgba(198,40,40,0.4); border: 1px solid rgba(198,40,40,0.5); color: #ef9a9a; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
+        .success { background: rgba(46,125,50,0.4); border: 1px solid rgba(76,175,80,0.4); color: #a5d6a7; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
+        .btn { width: 100%; padding: 12px; background: #1b5e20; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+        .btn:hover { background: #2e7d32; }
+        .link-text { text-align: center; margin-top: 15px; font-size: 13px; color: rgba(255,255,255,0.6); }
+        .link-text a { color: #4caf50; font-weight: bold; text-decoration: none; }
+        footer { background: rgba(0,0,0,0.8); color: rgba(255,255,255,0.4); text-align: center; padding: 15px; font-size: 13px; border-top: 1px solid rgba(76,175,80,0.15); }
     </style>
 </head>
 <body>
