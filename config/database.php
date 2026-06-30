@@ -64,6 +64,27 @@ return [
             ]) : [],
         ],
 
+        // Koneksi ke Server 2 (PC Teman) - Fragmentasi alat_pertanians luar Madiun
+        'fragment2' => [
+            'driver' => 'mysql',
+            'url' => env('DB_FRAGMENT2_URL'),
+            'host' => env('DB_FRAGMENT2_HOST', '127.0.0.1'),
+            'port' => env('DB_FRAGMENT2_PORT', '3306'),
+            'database' => env('DB_FRAGMENT2_DATABASE', 'forge'),
+            'username' => env('DB_FRAGMENT2_USERNAME', 'forge'),
+            'password' => env('DB_FRAGMENT2_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

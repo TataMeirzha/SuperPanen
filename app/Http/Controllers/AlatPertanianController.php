@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\AlatPertanian;
 
 class AlatPertanianController extends Controller
@@ -80,5 +81,38 @@ class AlatPertanianController extends Controller
             ->get();
 
         return view('user.alat.index', compact('alat', 'kecamatan', 'kabupaten'));
+    }
+
+    // Halaman pembuktian fragmentasi horizontal (UAS Basis Data)
+    public function gabungan()
+    {
+        // Ambil data dari Server 1 (Madiun) - database lokal
+        $dataServer1 = DB::connection('mysql')
+            ->table('alat_pertanians')
+            ->select('*')
+            ->get()
+            ->map(function ($item) {
+                $item->asal_server = 'Server 1';
+                return $item;
+            });
+
+        // Ambil data dari Server 2 (luar Madiun) - database PC teman
+        $dataServer2 = DB::connection('fragment2')
+            ->table('alat_pertanians')
+            ->select('*')
+            ->get()
+            ->map(function ($item) {
+                $item->asal_server = 'Server 2';
+                return $item;
+            });
+
+        // Gabungkan kedua hasil
+        $dataGabungan = $dataServer1->concat($dataServer2);
+
+        return view('alat-pertanian.index', [
+            'dataGabungan' => $dataGabungan,
+            'totalServer1' => $dataServer1->count(),
+            'totalServer2' => $dataServer2->count(),
+        ]);
     }
 }

@@ -20,6 +20,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/alat-pertanian-gabungan', [AlatPertanianController::class, 'gabungan'])->name('alat-pertanian.gabungan');
 
 // Super Admin
 Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(function () {
