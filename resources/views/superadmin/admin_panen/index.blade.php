@@ -10,6 +10,8 @@
     <a href="/superadmin/admin-panen" class="active">Kelola Admin Panen</a>
     <div class="menu-label">Laporan</div>
     <a href="/superadmin/laporan">Pusat Laporan</a>
+    <div class="menu-label">Database Terdistribusi</div>
+    <a href="/alat-pertanian-gabungan" class="{{ request()->is('alat-pertanian-gabungan*') ? 'active' : '' }}">Bukti Fragmentasi</a>
 @endsection
 
 @section('content')
