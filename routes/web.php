@@ -20,7 +20,6 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/alat-pertanian-gabungan', [AlatPertanianController::class, 'gabungan'])->name('alat-pertanian.gabungan');
 
 // Super Admin
 Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->group(function () {
@@ -78,9 +77,10 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->group(function () {
     Route::post('/laporan/store', [LaporanController::class, 'store']);
 });
 
-// Notifikasi (semua role yang sudah login)
+// Semua role yang sudah login
 Route::middleware('auth')->group(function () {
     Route::get('/notifikasi', [NotifikasiController::class, 'index']);
     Route::get('/notifikasi/{id}/baca', [NotifikasiController::class, 'baca']);
     Route::post('/notifikasi/baca-semua', [NotifikasiController::class, 'bacaSemua']);
+    Route::get('/alat-pertanian-gabungan', [AlatPertanianController::class, 'gabungan'])->name('alat-pertanian.gabungan');
 });

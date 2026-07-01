@@ -28,7 +28,14 @@ class AlatPertanianController extends Controller
             'kecamatan' => 'required',
             'kabupaten' => 'required',
             'provinsi' => 'required',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        // Simpan foto jika ada
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('alat', 'public');
+        }
 
         AlatPertanian::create([
             'mitra_id' => Auth::id(),
@@ -41,11 +48,12 @@ class AlatPertanianController extends Controller
             'kecamatan' => $request->kecamatan,
             'kabupaten' => $request->kabupaten,
             'provinsi' => $request->provinsi,
+            'foto' => $fotoPath,
         ]);
 
         return redirect('/mitra/alat')->with('success', 'Alat berhasil ditambahkan!');
     }
-
+    
     public function edit($id)
     {
         $alat = AlatPertanian::where('id', $id)->where('mitra_id', Auth::id())->firstOrFail();

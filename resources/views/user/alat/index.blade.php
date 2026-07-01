@@ -35,45 +35,60 @@
 @if($alat->count() > 0)
 <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:20px;">
     @foreach($alat as $item)
-    <div class="card" style="border-top:4px solid #2e7d32;">
-        <h3 style="color:#2e7d32; margin-bottom:8px;">{{ $item->nama_alat }}</h3>
-        <p style="color:#777; font-size:13px; margin-bottom:10px;">{{ $item->deskripsi ?? 'Tidak ada deskripsi.' }}</p>
-        <div style="font-size:13px; margin-bottom:5px; color:#555;">
-            Kategori: <strong>{{ $item->kategori }}</strong>
-        </div>
-        <div style="font-size:13px; margin-bottom:5px; color:#555;">
-            Lokasi: <strong>{{ $item->kecamatan }}, {{ $item->kabupaten }}</strong>
-        </div>
-        <div style="font-size:13px; margin-bottom:5px; color:#555;">
-            Mitra: <strong>{{ $item->mitra->name ?? '-' }}</strong>
-        </div>
-        <div style="font-size:15px; font-weight:bold; color:#2e7d32; margin-bottom:15px;">
-            Rp {{ number_format($item->harga_sewa_per_hari, 0, ',', '.') }} / hari
-        </div>
-        <button onclick="toggleSewa({{ $item->id }})" class="btn btn-green" style="width:100%;">Sewa Alat Ini</button>
+    <div class="card" style="border-top:4px solid #2e7d32; padding:0; overflow:hidden;">
 
-        <div id="sewa-{{ $item->id }}" style="display:none; margin-top:15px; border-top:1px solid #e0e0e0; padding-top:15px;">
-            <form action="/user/permintaan-sewa/store" method="POST">
-                @csrf
-                <input type="hidden" name="alat_pertanian_id" value="{{ $item->id }}">
-                <div class="form-group">
-                    <label>Tanggal Mulai</label>
-                    <input type="date" name="tanggal_mulai" min="{{ date('Y-m-d') }}" onchange="hitungBiaya({{ $item->id }}, {{ $item->harga_sewa_per_hari }})">
-                </div>
-                <div class="form-group">
-                    <label>Tanggal Selesai</label>
-                    <input type="date" name="tanggal_selesai" min="{{ date('Y-m-d') }}" onchange="hitungBiaya({{ $item->id }}, {{ $item->harga_sewa_per_hari }})">
-                </div>
-                <div class="form-group">
-                    <label>Catatan (Opsional)</label>
-                    <input type="text" name="catatan_user" placeholder="Pesan untuk mitra...">
-                </div>
-                <div id="preview-{{ $item->id }}" style="display:none; background:#f9fbe7; padding:10px; border-radius:6px; margin-bottom:10px; font-size:13px;">
-                    Durasi: <span id="durasi-{{ $item->id }}">0</span> hari |
-                    Total: <strong id="total-{{ $item->id }}">Rp 0</strong>
-                </div>
-                <button type="submit" class="btn btn-green" style="width:100%;">Kirim Permintaan Sewa</button>
-            </form>
+        {{-- FOTO ALAT --}}
+        @if($item->foto)
+            <img src="{{ asset('storage/' . $item->foto) }}"
+                alt="{{ $item->nama_alat }}"
+                style="width:100%; height:180px; object-fit:cover;">
+        @else
+            <div style="width:100%; height:180px; background:rgba(46,125,50,0.15); display:flex; align-items:center; justify-content:center;">
+                <span style="color:rgba(255,255,255,0.3); font-size:13px;">Tidak ada foto</span>
+            </div>
+        @endif
+
+        {{-- DETAIL ALAT --}}
+        <div style="padding:16px;">
+            <h3 style="color:#2e7d32; margin-bottom:8px;">{{ $item->nama_alat }}</h3>
+            <p style="color:#777; font-size:13px; margin-bottom:10px;">{{ $item->deskripsi ?? 'Tidak ada deskripsi.' }}</p>
+            <div style="font-size:13px; margin-bottom:5px; color:#aaa;">
+                Kategori: <strong style="color:white;">{{ $item->kategori }}</strong>
+            </div>
+            <div style="font-size:13px; margin-bottom:5px; color:#aaa;">
+                Lokasi: <strong style="color:white;">{{ $item->kecamatan }}, {{ $item->kabupaten }}</strong>
+            </div>
+            <div style="font-size:13px; margin-bottom:5px; color:#aaa;">
+                Mitra: <strong style="color:white;">{{ $item->mitra->name ?? '-' }}</strong>
+            </div>
+            <div style="font-size:15px; font-weight:bold; color:#4caf50; margin-bottom:15px;">
+                Rp {{ number_format($item->harga_sewa_per_hari, 0, ',', '.') }} / hari
+            </div>
+            <button onclick="toggleSewa({{ $item->id }})" class="btn btn-green" style="width:100%;">Sewa Alat Ini</button>
+
+            <div id="sewa-{{ $item->id }}" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                <form action="/user/permintaan-sewa/store" method="POST">
+                    @csrf
+                    <input type="hidden" name="alat_pertanian_id" value="{{ $item->id }}">
+                    <div class="form-group">
+                        <label>Tanggal Mulai</label>
+                        <input type="date" name="tanggal_mulai" min="{{ date('Y-m-d') }}" onchange="hitungBiaya({{ $item->id }}, {{ $item->harga_sewa_per_hari }})">
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Selesai</label>
+                        <input type="date" name="tanggal_selesai" min="{{ date('Y-m-d') }}" onchange="hitungBiaya({{ $item->id }}, {{ $item->harga_sewa_per_hari }})">
+                    </div>
+                    <div class="form-group">
+                        <label>Catatan (Opsional)</label>
+                        <input type="text" name="catatan_user" placeholder="Pesan untuk mitra...">
+                    </div>
+                    <div id="preview-{{ $item->id }}" style="display:none; background:rgba(46,125,50,0.2); padding:10px; border-radius:6px; margin-bottom:10px; font-size:13px; color:white;">
+                        Durasi: <span id="durasi-{{ $item->id }}">0</span> hari |
+                        Total: <strong id="total-{{ $item->id }}">Rp 0</strong>
+                    </div>
+                    <button type="submit" class="btn btn-green" style="width:100%;">Kirim Permintaan Sewa</button>
+                </form>
+            </div>
         </div>
     </div>
     @endforeach

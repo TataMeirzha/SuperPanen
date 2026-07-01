@@ -23,7 +23,7 @@
 @endif
 
 <div class="card" style="max-width:700px;">
-    <form action="/mitra/alat/store" method="POST">
+    <form action="/mitra/alat/store" method="POST" enctype="multipart/form-data">
         @csrf
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="form-group">
@@ -63,16 +63,30 @@
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px;">
             <div class="form-group">
                 <label>Kecamatan</label>
-                <input type="text" name="kecamatan" value="{{ old('kecamatan', Auth::user()->kecamatan) }}" placeholder="Kecamatan">
+                <input type="text" name="kecamatan" value="{{ old('kecamatan', Auth::user()->kecamatan) }}">
             </div>
             <div class="form-group">
                 <label>Kabupaten</label>
-                <input type="text" name="kabupaten" value="{{ old('kabupaten', Auth::user()->kabupaten) }}" placeholder="Kabupaten">
+                <input type="text" name="kabupaten" value="{{ old('kabupaten', Auth::user()->kabupaten) }}">
             </div>
             <div class="form-group">
                 <label>Provinsi</label>
-                <input type="text" name="provinsi" value="{{ old('provinsi', Auth::user()->provinsi) }}" placeholder="Provinsi">
+                <input type="text" name="provinsi" value="{{ old('provinsi', Auth::user()->provinsi) }}">
             </div>
+        </div>
+
+        {{-- UPLOAD FOTO --}}
+        <div class="form-group">
+            <label>Foto Alat (Opsional)</label>
+            <input type="file" name="foto" accept="image/*" onchange="previewFoto(event)" style="padding:8px;">
+            <small>Format: JPG, PNG, JPEG. Maksimal 2MB.</small>
+        </div>
+
+        {{-- PREVIEW FOTO --}}
+        <div id="preview-container" style="display:none; margin-bottom:15px;">
+            <p style="color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:8px;">Preview:</p>
+            <img id="preview-foto" src="" alt="Preview"
+                style="max-width:250px; max-height:180px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); object-fit:cover;">
         </div>
 
         <div style="display:flex; gap:10px; margin-top:10px;">
@@ -81,4 +95,18 @@
         </div>
     </form>
 </div>
+
+<script>
+function previewFoto(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-foto').src = e.target.result;
+            document.getElementById('preview-container').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
 @endsection
