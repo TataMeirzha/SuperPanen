@@ -163,12 +163,52 @@
         <div style="background:#f9fbe7; padding:15px; border-radius:8px; margin-bottom:15px;">
             <p style="font-size:13px; color:#555;">
                 Lokasi lahan kamu: <strong>{{ Auth::user()->kecamatan }}, {{ Auth::user()->kabupaten }}</strong><br>
-                <small style="color:#999;">Rekomendasi alat akan ditampilkan berdasarkan kecamatan ini.</small>
+                <small style="color:#999;">Rekomendasi alat di bawah ditampilkan berdasarkan kecamatan ini.</small>
             </p>
         </div>
 
+        <div class="form-group" style="margin-bottom:15px;">
+            <label>Rekomendasi Alat yang Bisa Disewa <span style="color:#999; font-weight:normal;">(opsional, tidak wajib disewa)</span></label>
+
+            @if($alatRekomendasi->isEmpty())
+                <div style="background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:15px; font-size:13px; color:#999;">
+                    Belum ada alat pengolahan tanah/penanaman yang tersedia di kecamatan {{ Auth::user()->kecamatan }} saat ini.
+                    <a href="/user/alat" style="color:#4caf50;">Cari alat di kecamatan lain &rarr;</a>
+                </div>
+            @else
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    @foreach($alatRekomendasi as $alat)
+                        <div style="background:#1a1a1a; border:1px solid #2e7d32; border-radius:8px; overflow:hidden;">
+                            @if($alat->foto)
+                                <img src="{{ asset('storage/' . $alat->foto) }}"
+                                    alt="{{ $alat->nama_alat }}"
+                                    style="width:100%; height:130px; object-fit:cover;">
+                            @else
+                                <div style="width:100%; height:130px; background:rgba(46,125,50,0.15); display:flex; align-items:center; justify-content:center;">
+                                    <span style="color:rgba(255,255,255,0.3); font-size:12px;">Tidak ada foto</span>
+                                </div>
+                            @endif
+                            <div style="padding:12px 14px;">
+                                <div style="display:flex; justify-content:space-between; align-items:start;">
+                                    <strong style="color:#fff; font-size:14px;">{{ $alat->nama_alat }}</strong>
+                                    <span style="background:#2e4d32; color:#4caf50; font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap;">{{ $alat->kategori }}</span>
+                                </div>
+                                <p style="color:#aaa; font-size:12px; margin:6px 0;">
+                                    {{ $alat->kecamatan }}, {{ $alat->kabupaten }} &middot; Pemilik: {{ $alat->mitra->name ?? '-' }}
+                                </p>
+                                <p style="color:#00e676; font-size:14px; font-weight:600; margin:0;">
+                                    Rp {{ number_format($alat->harga_sewa_per_hari, 0, ',', '.') }} / hari
+                                </p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <a href="/user/alat" style="display:inline-block; margin-top:10px; font-size:12px; color:#4caf50;">Lihat semua alat tersedia &rarr;</a>
+            @endif
+        </div>
+
         <div style="display:flex; gap:10px; margin-top:10px;">
-            <button type="submit" class="btn btn-green">Simpan dan Lihat Rekomendasi</button>
+            <button type="submit" class="btn btn-green">Simpan dan Prediksi Modal</button>
             <a href="/user/pra-panen" class="btn btn-gray">Batal</a>
         </div>
     </form>
