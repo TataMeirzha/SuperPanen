@@ -16,6 +16,10 @@
 @section('content')
 <div class="page-title">Daftar Alat Pertanian Saya</div>
 
+@if(session('success'))
+    <div class="alert-success" style="margin-bottom:15px;">{{ session('success') }}</div>
+@endif
+
 <a href="/mitra/alat/create" class="btn btn-green" style="margin-bottom:15px;">Tambah Alat Baru</a>
 
 <div class="card">
@@ -23,6 +27,7 @@
         <thead>
             <tr>
                 <th>No</th>
+                <th>Foto</th>
                 <th>Nama Alat</th>
                 <th>Kategori</th>
                 <th>Harga Sewa/Hari</th>
@@ -36,6 +41,15 @@
             @forelse($alat as $index => $item)
             <tr>
                 <td align="center">{{ $index + 1 }}</td>
+                <td align="center">
+                    @if($item->foto)
+                        <img src="{{ asset('storage/' . $item->foto) }}"
+                             alt="Foto"
+                             style="width:60px; height:45px; object-fit:cover; border-radius:6px;">
+                    @else
+                        <span style="font-size:11px; color:#777;">Tidak ada foto</span>
+                    @endif
+                </td>
                 <td>{{ $item->nama_alat }}</td>
                 <td>{{ $item->kategori }}</td>
                 <td>Rp {{ number_format($item->harga_sewa_per_hari, 0, ',', '.') }}</td>
@@ -60,7 +74,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8" style="text-align:center; color:#999; padding:20px;">Belum ada alat terdaftar. <a href="/mitra/alat/create" style="color:#2e7d32;">Tambah sekarang</a></td></tr>
+            <tr><td colspan="9" style="text-align:center; color:#999; padding:20px;">Belum ada alat terdaftar. <a href="/mitra/alat/create" style="color:#2e7d32;">Tambah sekarang</a></td></tr>
             @endforelse
         </tbody>
     </table>

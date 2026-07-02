@@ -23,7 +23,7 @@
 @endif
 
 <div class="card" style="max-width:700px;">
-    <form action="/mitra/alat/update/{{ $alat->id }}" method="POST">
+    <form action="/mitra/alat/update/{{ $alat->id }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
@@ -83,10 +83,47 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label>Foto Alat</label>
+
+            @if($alat->foto)
+                <div style="margin-bottom:10px;">
+                    <p style="font-size:12px; color:#999; margin-bottom:5px;">Foto saat ini:</p>
+                    <img src="{{ asset('storage/' . $alat->foto) }}"
+                         alt="Foto Alat"
+                         style="width:180px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #333;">
+                </div>
+            @else
+                <p style="font-size:12px; color:#999; margin-bottom:8px;">Belum ada foto.</p>
+            @endif
+
+            <input type="file" name="foto" id="foto" accept="image/jpg,image/jpeg,image/png"
+                   style="color:#ccc;"
+                   onchange="previewFoto(this)">
+            <p style="font-size:11px; color:#777; margin-top:4px;">Kosongkan jika tidak ingin mengganti foto. Format: JPG, JPEG, PNG. Maks: 2MB.</p>
+
+            <img id="preview" src="#" alt="Preview"
+                 style="display:none; margin-top:10px; width:180px; height:120px; object-fit:cover; border-radius:8px; border:1px solid #2e7d32;">
+        </div>
+
         <div style="display:flex; gap:10px; margin-top:10px;">
             <button type="submit" class="btn btn-green">Simpan Perubahan</button>
             <a href="/mitra/alat" class="btn btn-gray">Batal</a>
         </div>
     </form>
 </div>
+
+<script>
+function previewFoto(input) {
+    const preview = document.getElementById('preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 @endsection

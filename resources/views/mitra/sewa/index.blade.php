@@ -82,8 +82,10 @@
                             @csrf
                             <input type="hidden" name="status" value="disetujui">
                             <div class="form-group">
-                                <label>Catatan (opsional)</label>
-                                <input type="text" name="catatan_mitra" placeholder="Catatan untuk petani...">
+                                <label style="color:#111;">Catatan (opsional)</label>
+                                <input type="text" name="catatan_mitra"
+                                       placeholder="Catatan untuk petani..."
+                                       style="color:#111; background:#fff; border:1px solid #ccc;">
                             </div>
                             <button type="submit" class="btn btn-green">Setujui Permintaan</button>
                         </form>
@@ -91,8 +93,11 @@
                             @csrf
                             <input type="hidden" name="status" value="ditolak">
                             <div class="form-group">
-                                <label>Alasan Penolakan</label>
-                                <input type="text" name="catatan_mitra" placeholder="Alasan penolakan..." required>
+                                <label style="color:#111;">Alasan Penolakan</label>
+                                <input type="text" name="catatan_mitra"
+                                       placeholder="Alasan penolakan..."
+                                       style="color:#111; background:#fff; border:1px solid #ccc;"
+                                       required>
                             </div>
                             <button type="submit" class="btn btn-red">Tolak Permintaan</button>
                         </form>

@@ -64,12 +64,14 @@
             <div style="font-size:15px; font-weight:bold; color:#4caf50; margin-bottom:15px;">
                 Rp {{ number_format($item->harga_sewa_per_hari, 0, ',', '.') }} / hari
             </div>
+
             <button onclick="toggleSewa({{ $item->id }})" class="btn btn-green" style="width:100%;">Sewa Alat Ini</button>
 
             <div id="sewa-{{ $item->id }}" style="display:none; margin-top:15px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-                <form action="/user/permintaan-sewa/store" method="POST">
+                <form action="/user/permintaan-sewa/store" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="alat_pertanian_id" value="{{ $item->id }}">
+
                     <div class="form-group">
                         <label>Tanggal Mulai</label>
                         <input type="date" name="tanggal_mulai" min="{{ date('Y-m-d') }}" onchange="hitungBiaya({{ $item->id }}, {{ $item->harga_sewa_per_hari }})">
@@ -82,10 +84,25 @@
                         <label>Catatan (Opsional)</label>
                         <input type="text" name="catatan_user" placeholder="Pesan untuk mitra...">
                     </div>
+
+                    {{-- VERIFIKASI KTP --}}
+                    <div class="form-group">
+                        <label style="color:#4caf50; font-weight:bold;">Foto KTP <span style="color:#e57373;">*</span></label>
+                        <p style="font-size:11px; color:#777; margin-bottom:8px;">Upload foto KTP kamu sebagai verifikasi identitas penyewa. Format: JPG, JPEG, PNG. Maks: 2MB.</p>
+                        <input type="file" name="foto_ktp" id="foto_ktp_{{ $item->id }}"
+                               accept="image/jpg,image/jpeg,image/png"
+                               required
+                               style="color:#ccc;"
+                               onchange="previewKtp({{ $item->id }}, this)">
+                        <img id="preview_ktp_{{ $item->id }}" src="#" alt="Preview KTP"
+                             style="display:none; margin-top:10px; width:100%; height:130px; object-fit:cover; border-radius:8px; border:1px solid #2e7d32;">
+                    </div>
+
                     <div id="preview-{{ $item->id }}" style="display:none; background:rgba(46,125,50,0.2); padding:10px; border-radius:6px; margin-bottom:10px; font-size:13px; color:white;">
                         Durasi: <span id="durasi-{{ $item->id }}">0</span> hari |
                         Total: <strong id="total-{{ $item->id }}">Rp 0</strong>
                     </div>
+
                     <button type="submit" class="btn btn-green" style="width:100%;">Kirim Permintaan Sewa</button>
                 </form>
             </div>
@@ -116,6 +133,18 @@ function hitungBiaya(id, hargaPerHari) {
             document.getElementById('durasi-' + id).textContent = diff;
             document.getElementById('total-' + id).textContent = 'Rp ' + (diff * hargaPerHari).toLocaleString('id-ID');
         }
+    }
+}
+
+function previewKtp(id, input) {
+    const preview = document.getElementById('preview_ktp_' + id);
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
     }
 }
 </script>

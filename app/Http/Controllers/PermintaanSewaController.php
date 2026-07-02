@@ -19,11 +19,15 @@ class PermintaanSewaController extends Controller
             'tanggal_mulai' => 'required|date|after_or_equal:today',
             'tanggal_selesai' => 'required|date|after:tanggal_mulai',
             'pra_panen_id' => 'nullable|exists:pra_panens,id',
+            'foto_ktp' => 'required|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $alat = AlatPertanian::findOrFail($request->alat_pertanian_id);
         $durasi = \Carbon\Carbon::parse($request->tanggal_mulai)->diffInDays(\Carbon\Carbon::parse($request->tanggal_selesai));
         $totalBiaya = $alat->harga_sewa_per_hari * $durasi;
+
+        // Simpan foto KTP
+        $fotoKtpPath = $request->file('foto_ktp')->store('ktp', 'public');
 
         $sewa = PermintaanSewa::create([
             'user_id' => Auth::id(),
@@ -35,6 +39,7 @@ class PermintaanSewaController extends Controller
             'total_biaya' => $totalBiaya,
             'status' => 'pending',
             'catatan_user' => $request->catatan_user,
+            'foto_ktp' => $fotoKtpPath,
         ]);
 
         // Notifikasi ke mitra
