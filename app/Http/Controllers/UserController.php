@@ -20,7 +20,19 @@ class UserController extends Controller
     {
         $tanaman = DB::table('tanamanlist')->orderBy('kategori')->orderBy('nama')->get();
         $tanamanByKategori = $tanaman->groupBy('kategori');
-        return view('user.pra_panen.create', compact('tanamanByKategori'));
+
+        $user = Auth::user();
+        $alatRekomendasi = \App\Models\AlatPertanian::where('status', 'tersedia')
+            ->whereIn('kategori', ['Pengolahan Tanah', 'Penanaman'])
+            ->where(function ($q) use ($user) {
+                $q->where('kecamatan', $user->kecamatan)
+                  ->orWhere('kabupaten', $user->kabupaten);
+            })
+            ->with('mitra')
+            ->latest()
+            ->get();
+
+        return view('user.pra_panen.create', compact('tanamanByKategori', 'alatRekomendasi'));
     }
 
     public function praPanenStore(Request $request)
