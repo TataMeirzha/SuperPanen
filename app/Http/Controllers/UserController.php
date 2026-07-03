@@ -44,13 +44,30 @@ class UserController extends Controller
             'satuan_bibit' => 'required',
             'tanggal_tanam' => 'required|date',
             'musim' => 'required',
+            'alat_pertanian_id' => 'nullable|exists:alat_pertanians,id',
+            'tanggal_mulai_sewa' => 'nullable|date|required_with:alat_pertanian_id|after_or_equal:today',
+            'tanggal_selesai_sewa' => 'nullable|date|required_with:alat_pertanian_id|after:tanggal_mulai_sewa',
+            'foto_ktp' => 'nullable|image|mimes:jpg,jpeg,png|max:2048|required_with:alat_pertanian_id',
         ]);
 
         $jumlahKg = $request->satuan_bibit === 'ton' ? $request->jumlah_bibit * 1000 : $request->jumlah_bibit;
         $luasLahan = round($jumlahKg * 0.02, 2);
         $estimasiModal = $luasLahan * 5000000;
 
-        PraPanen::create([
+        $biayaSewaAlat = 0;
+        $alat = null;
+        $durasiSewa = 0;
+
+        if ($request->filled('alat_pertanian_id')) {
+            $alat = \App\Models\AlatPertanian::findOrFail($request->alat_pertanian_id);
+            $durasiSewa = \Carbon\Carbon::parse($request->tanggal_mulai_sewa)
+                ->diffInDays(\Carbon\Carbon::parse($request->tanggal_selesai_sewa));
+            $durasiSewa = max($durasiSewa, 1);
+            $biayaSewaAlat = $alat->harga_sewa_per_hari * $durasiSewa;
+            $estimasiModal += $biayaSewaAlat;
+        }
+
+        $praPanen = PraPanen::create([
             'user_id' => Auth::id(),
             'kategori_tanaman' => $request->kategori_tanaman,
             'nama_tanaman' => $request->nama_tanaman,
@@ -62,8 +79,37 @@ class UserController extends Controller
             'kabupaten' => Auth::user()->kabupaten,
             'luas_lahan_rekomendasi' => $luasLahan,
             'estimasi_modal' => $estimasiModal,
+            'biaya_sewa_alat' => $biayaSewaAlat,
             'status' => 'aktif',
         ]);
+
+        // Kalau user pilih sewa alat, langsung buat permintaan sewa resmi ke mitra
+        if ($alat) {
+            $fotoKtpPath = $request->file('foto_ktp')->store('ktp', 'public');
+
+            \App\Models\PermintaanSewa::create([
+                'user_id' => Auth::id(),
+                'alat_pertanian_id' => $alat->id,
+                'pra_panen_id' => $praPanen->id,
+                'tanggal_mulai' => $request->tanggal_mulai_sewa,
+                'tanggal_selesai' => $request->tanggal_selesai_sewa,
+                'durasi_hari' => $durasiSewa,
+                'total_biaya' => $biayaSewaAlat,
+                'status' => 'pending',
+                'catatan_user' => 'Diajukan otomatis saat pencatatan pra panen.',
+                'foto_ktp' => $fotoKtpPath,
+            ]);
+
+            \App\Models\Notifikasi::create([
+                'user_id' => $alat->mitra_id,
+                'judul' => 'Permintaan Sewa Baru!',
+                'pesan' => Auth::user()->name . ' ingin menyewa ' . $alat->nama_alat . ' selama ' . $durasiSewa . ' hari.',
+                'tipe' => 'sewa',
+                'url' => '/mitra/permintaan-sewa',
+            ]);
+
+            return redirect('/user/pra-panen')->with('success', 'Data pra panen tersimpan & permintaan sewa alat sudah dikirim ke mitra, tinggal tunggu persetujuan!');
+        }
 
         return redirect('/user/pra-panen')->with('success', 'Data pra panen berhasil disimpan!');
     }

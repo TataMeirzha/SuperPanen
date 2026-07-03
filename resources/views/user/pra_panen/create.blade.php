@@ -85,7 +85,7 @@
 @endif
 
 <div class="card">
-    <form action="/user/pra-panen/store" method="POST">
+    <form action="/user/pra-panen/store" method="POST" enctype="multipart/form-data">
         @csrf
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
@@ -120,7 +120,8 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
             <div class="form-group">
                 <label>Jumlah Bibit</label>
-                <input type="number" name="jumlah_bibit" value="{{ old('jumlah_bibit') }}" placeholder="Contoh: 50" step="0.01">
+                <input type="number" name="jumlah_bibit" id="jumlah_bibit" value="{{ old('jumlah_bibit') }}" placeholder="Contoh: 50" step="0.01">
+                <p id="rekomendasi-luas-text" style="color:#4caf50; font-size:12px; margin:6px 0 0;"></p>
             </div>
             <div class="form-group">
                 <label>Satuan Bibit</label>
@@ -157,6 +158,7 @@
                     </div>
                     <input type="hidden" name="musim" id="musim" value="{{ old('musim') }}">
                 </div>
+                <p id="rekomendasi-musim-text" style="color:#4caf50; font-size:12px; margin:6px 0 0;"></p>
             </div>
         </div>
 
@@ -177,14 +179,21 @@
                 </div>
             @else
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <label style="display:flex; align-items:center; gap:8px; background:#1a1a1a; border:1px dashed #444; border-radius:8px; padding:12px 14px; cursor:pointer; grid-column:1 / -1;">
+                        <input type="radio" name="alat_pertanian_id" value="" class="alat-radio" checked>
+                        <span style="color:#999; font-size:13px;">Tidak sewa alat sekarang, cuma cek pra panen saja</span>
+                    </label>
                     @foreach($alatRekomendasi as $alat)
-                        <div style="background:#1a1a1a; border:1px solid #2e7d32; border-radius:8px; overflow:hidden;">
+                        <label style="display:block; background:#1a1a1a; border:1px solid #2e7d32; border-radius:8px; overflow:hidden; cursor:pointer;">
+                            <input type="radio" name="alat_pertanian_id" value="{{ $alat->id }}"
+                                class="alat-radio" data-harga="{{ $alat->harga_sewa_per_hari }}"
+                                style="margin:10px 0 0 10px;">
                             @if($alat->foto)
                                 <img src="{{ asset('storage/' . $alat->foto) }}"
                                     alt="{{ $alat->nama_alat }}"
-                                    style="width:100%; height:130px; object-fit:cover;">
+                                    style="width:100%; height:130px; object-fit:cover; margin-top:-24px;">
                             @else
-                                <div style="width:100%; height:130px; background:rgba(46,125,50,0.15); display:flex; align-items:center; justify-content:center;">
+                                <div style="width:100%; height:130px; background:rgba(46,125,50,0.15); display:flex; align-items:center; justify-content:center; margin-top:-24px;">
                                     <span style="color:rgba(255,255,255,0.3); font-size:12px;">Tidak ada foto</span>
                                 </div>
                             @endif
@@ -200,9 +209,31 @@
                                     Rp {{ number_format($alat->harga_sewa_per_hari, 0, ',', '.') }} / hari
                                 </p>
                             </div>
-                        </div>
+                        </label>
                     @endforeach
                 </div>
+
+                <div id="sewa-tanggal-box" style="display:none; background:#1a1a1a; border:1px solid #2e7d32; border-radius:8px; padding:14px; margin-top:12px;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Tanggal Mulai Sewa</label>
+                            <input type="date" name="tanggal_mulai_sewa" id="tanggal_mulai_sewa" value="{{ old('tanggal_mulai_sewa') }}">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Tanggal Selesai Sewa</label>
+                            <input type="date" name="tanggal_selesai_sewa" id="tanggal_selesai_sewa" value="{{ old('tanggal_selesai_sewa') }}">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top:15px; margin-bottom:0;">
+                        <label>Foto KTP <span style="color:#999; font-weight:normal;">(wajib, buat verifikasi mitra)</span></label>
+                        <input type="file" name="foto_ktp" id="foto_ktp" accept="image/png, image/jpeg, image/jpg">
+                    </div>
+                    <p style="color:#00e676; font-size:13px; margin:12px 0 0;" id="estimasi-sewa-text"></p>
+                    <p style="color:#999; font-size:11px; margin:6px 0 0;">
+                        *Permintaan sewa akan langsung terkirim ke mitra pemilik alat begitu kamu klik "Simpan dan Prediksi Modal". Sistem ini belum ada transaksi/pembayaran, cuma pengajuan yang perlu di-ACC dulu oleh mitra.
+                    </p>
+                </div>
+
                 <a href="/user/alat" style="display:inline-block; margin-top:10px; font-size:12px; color:#4caf50;">Lihat semua alat tersedia &rarr;</a>
             @endif
         </div>
@@ -245,26 +276,50 @@
     }
 
     const ddTanaman = initDropdown('dd-tanaman');
+    const ddMusim = initDropdown('dd-musim');
+    const musimLabelMap = { hujan: 'Musim Hujan', kemarau: 'Musim Kemarau', pancaroba: 'Pancaroba' };
 
     initDropdown('dd-kategori', function (kategori) {
         const list = ddTanaman.dd.querySelector('.dd-list');
         list.innerHTML = '';
         ddTanaman.label.textContent = '-- Pilih Tanaman --';
         ddTanaman.hidden.value = '';
+        document.getElementById('rekomendasi-musim-text').innerHTML = '';
 
         if (kategori && tanamanData[kategori]) {
             tanamanData[kategori].forEach(function (item) {
                 const div = document.createElement('div');
                 div.className = 'dd-item';
                 div.dataset.value = item.nama;
+                div.dataset.musim = item.musim_rekomendasi || '';
                 div.textContent = item.nama;
                 list.appendChild(div);
             });
         }
     });
 
+    // Setelah nama tanaman dipilih, tampilkan rekomendasi musim tanamnya
+    document.getElementById('dd-tanaman').addEventListener('click', function (e) {
+        const item = e.target.closest('.dd-item');
+        if (!item) return;
+        const musimText = document.getElementById('rekomendasi-musim-text');
+        const musim = item.dataset.musim;
+
+        if (musim && musimLabelMap[musim]) {
+            musimText.innerHTML = 'Rekomendasi musim tanam untuk <strong>' + item.dataset.value + '</strong>: '
+                + musimLabelMap[musim]
+                + ' <button type="button" id="btn-pakai-musim" style="margin-left:6px; background:#2e4d32; color:#4caf50; border:none; border-radius:5px; padding:3px 10px; font-size:11px; cursor:pointer;">Pakai rekomendasi ini</button>';
+
+            document.getElementById('btn-pakai-musim').addEventListener('click', function () {
+                ddMusim.label.textContent = musimLabelMap[musim];
+                ddMusim.hidden.value = musim;
+            });
+        } else {
+            musimText.innerHTML = '';
+        }
+    });
+
     initDropdown('dd-satuan');
-    initDropdown('dd-musim');
 
     document.addEventListener('click', function (e) {
         if (!e.target.closest('.custom-dropdown')) {
@@ -272,5 +327,61 @@
             document.querySelectorAll('.dd-toggle').forEach(t => t.classList.remove('open'));
         }
     });
+
+    // Rekomendasi luas lahan live, mengikuti jumlah bibit & satuan
+    const jumlahBibitInput = document.getElementById('jumlah_bibit');
+    const rekomendasiLuasText = document.getElementById('rekomendasi-luas-text');
+
+    function hitungRekomendasiLuas() {
+        const jumlah = parseFloat(jumlahBibitInput.value || 0);
+        const satuan = document.getElementById('satuan_bibit').value || 'kg';
+        if (!jumlah) {
+            rekomendasiLuasText.textContent = '';
+            return;
+        }
+        const jumlahKg = satuan === 'ton' ? jumlah * 1000 : jumlah;
+        const luasLahan = Math.round(jumlahKg * 0.02 * 100) / 100;
+        rekomendasiLuasText.textContent = 'Rekomendasi luas lahan: \u2248 ' + luasLahan.toLocaleString('id-ID') + ' Ha';
+    }
+
+    jumlahBibitInput.addEventListener('input', hitungRekomendasiLuas);
+    document.getElementById('dd-satuan').addEventListener('click', hitungRekomendasiLuas);
+
+    // Sewa alat: tampilkan box tanggal + hitung estimasi biaya
+    const radios = document.querySelectorAll('.alat-radio');
+    const tanggalBox = document.getElementById('sewa-tanggal-box');
+    const mulaiInput = document.getElementById('tanggal_mulai_sewa');
+    const selesaiInput = document.getElementById('tanggal_selesai_sewa');
+    const estimasiText = document.getElementById('estimasi-sewa-text');
+
+    function hitungEstimasiSewa() {
+        const checked = document.querySelector('.alat-radio:checked');
+        if (!checked || !checked.value) {
+            tanggalBox.style.display = 'none';
+            return;
+        }
+        tanggalBox.style.display = 'block';
+
+        const harga = parseFloat(checked.dataset.harga || 0);
+        const mulai = mulaiInput.value;
+        const selesai = selesaiInput.value;
+
+        if (mulai && selesai) {
+            const d1 = new Date(mulai);
+            const d2 = new Date(selesai);
+            let durasi = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+            if (durasi < 1) durasi = 1;
+            const total = harga * durasi;
+            estimasiText.textContent = 'Estimasi biaya sewa: ' + durasi + ' hari x Rp '
+                + harga.toLocaleString('id-ID') + ' = Rp ' + total.toLocaleString('id-ID')
+                + ' (akan ditambahkan ke prediksi modal)';
+        } else {
+            estimasiText.textContent = 'Isi tanggal mulai & selesai untuk lihat estimasi biaya sewa.';
+        }
+    }
+
+    radios.forEach(r => r.addEventListener('change', hitungEstimasiSewa));
+    mulaiInput?.addEventListener('change', hitungEstimasiSewa);
+    selesaiInput?.addEventListener('change', hitungEstimasiSewa);
 </script>
 @endsection
