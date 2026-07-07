@@ -75,6 +75,7 @@ Route::middleware(['auth', 'role:user'])->prefix('user')->group(function () {
     Route::get('/laporan', [LaporanController::class, 'index']);
     Route::get('/laporan/create', [LaporanController::class, 'create']);
     Route::post('/laporan/store', [LaporanController::class, 'store']);
+    Route::get('/laporan-panen', [UserController::class, 'laporanPanen']);
 });
 
 // Semua role yang sudah login

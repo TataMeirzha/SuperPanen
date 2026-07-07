@@ -14,8 +14,11 @@
     <a href="/user/alat" class="{{ request()->is('user/alat*') ? 'active' : '' }}">Cari Alat Tani</a>
     <a href="/user/permintaan-sewa" class="{{ request()->is('user/permintaan-sewa*') ? 'active' : '' }}">Permintaan Sewa Saya</a>
 
+    <div class="menu-label">Laporan</div>
+    <a href="/user/laporan-panen" class="{{ request()->is('user/laporan-panen*') ? 'active' : '' }}">Laporan Hasil Panen</a>
+
     <div class="menu-label">Bantuan</div>
-    <a href="/user/laporan" class="{{ request()->is('user/laporan*') ? 'active' : '' }}">Laporan Saya</a>
+    <a href="/user/laporan" class="{{ request()->is('user/laporan') || request()->is('user/laporan/*') ? 'active' : '' }}">Laporan Saya</a>
 @endsection
 
 @section('content')

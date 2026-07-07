@@ -158,4 +158,76 @@ class UserController extends Controller
 
         return redirect('/user/pasca-panen')->with('success', 'Data pasca panen berhasil disimpan!');
     }
+
+    public function laporanPanen()
+    {
+        $user = Auth::user();
+
+        // Ambil semua pra panen user beserta pasca panen nya
+        $siklus = PraPanen::where('user_id', $user->id)
+            ->with(['pascaPanen', 'permintaanSewa' => function ($q) {
+                $q->where('status', 'disetujui');
+            }])
+            ->latest()
+            ->get()
+            ->map(function ($pra) {
+                $pasca = $pra->pascaPanen;
+
+                // Total biaya sewa alat yang disetujui
+                $totalSewa = $pra->permintaanSewa->sum('total_biaya');
+
+                if ($pasca) {
+                    $labaRugi = $pasca->keuntungan_bersih;
+                    $status = $labaRugi >= 0 ? 'laba' : 'rugi';
+                } else {
+                    $labaRugi = null;
+                    $status = 'aktif';
+                }
+
+                return [
+                    'id' => $pra->id,
+                    'nama_tanaman' => $pra->nama_tanaman,
+                    'kategori_tanaman' => $pra->kategori_tanaman,
+                    'tanggal_tanam' => $pra->tanggal_tanam,
+                    'musim' => $pra->musim,
+                    'estimasi_modal' => $pra->estimasi_modal,
+                    'luas_lahan' => $pra->luas_lahan_rekomendasi,
+                    'tanggal_panen' => $pasca?->tanggal_panen,
+                    'hasil_panen' => $pasca?->hasil_panen,
+                    'satuan_hasil' => $pasca?->satuan_hasil,
+                    'modal_real' => $pasca?->modal_real,
+                    'total_pendapatan' => $pasca?->total_pendapatan,
+                    'biaya_sewa' => $totalSewa,
+                    'keuntungan_bersih' => $labaRugi,
+                    'status' => $status,
+                    'pra_panen_id' => $pra->id,
+                ];
+            });
+
+        // Statistik keseluruhan
+        $selesai = $siklus->where('status', '!=', 'aktif');
+        $totalPendapatan = $selesai->sum('total_pendapatan');
+        $totalModal = $selesai->sum('modal_real');
+        $totalSewa = $selesai->sum('biaya_sewa');
+        $totalKeuntungan = $selesai->where('status', 'laba')->sum('keuntungan_bersih');
+        $totalKerugian = abs($selesai->where('status', 'rugi')->sum('keuntungan_bersih'));
+
+        // Performa per tanaman
+        $perTanaman = $selesai->groupBy('nama_tanaman')->map(function ($group) {
+            return [
+                'nama' => $group->first()['nama_tanaman'],
+                'total_laba_rugi' => $group->sum('keuntungan_bersih'),
+            ];
+        })->values()->sortByDesc('total_laba_rugi')->take(5);
+
+        return view('user.laporan_panen.index', compact(
+            'siklus',
+            'totalPendapatan',
+            'totalModal',
+            'totalSewa',
+            'totalKeuntungan',
+            'totalKerugian',
+            'perTanaman'
+        ));
+    }
 }
